@@ -1627,15 +1627,49 @@
             const savedData = localStorage.getItem('priceTableData');
             if (savedData) {
                 const data = JSON.parse(savedData);
-                const rows = table.querySelectorAll('tbody tr');
-                rows.forEach((row, rowIndex) => {
-                    const cells = row.querySelectorAll('td');
-                    if (data[rowIndex]) {
-                        data[rowIndex].forEach((cellText, colIndex) => {
-                            if (cells[colIndex]) {
-                                cells[colIndex].innerText = cellText;
+                const tbody = table.getElementsByTagName('tbody')[0];
+                
+                // Mevcut satırları temizle (+ Satır Ekle hariç)
+                const existingRows = tbody.querySelectorAll('tr:not(.add-row-cell)');
+                existingRows.forEach(row => {
+                    if (!row.querySelector('.add-row-cell')) {
+                        row.remove();
+                    }
+                });
+                
+                // Mevcut sütun sayısını hesapla (+ Sütun Ekle hariç)
+                const headerRow2 = table.querySelector('thead tr:last-child');
+                let totalColumns = 0;
+                for (let i = 0; i < headerRow2.cells.length; i++) {
+                    if (!headerRow2.cells[i].classList.contains('add-col-header')) {
+                        totalColumns++;
+                    }
+                }
+                
+                // Kaydedilen verileri yükle
+                data.forEach((rowData, rowIndex) => {
+                    if (rowData.length > 0) {
+                        const newRow = tbody.insertRow(rowIndex);
+                        
+                        // Tüm sütunlar için hücre oluştur
+                        for (let colIndex = 0; colIndex < totalColumns; colIndex++) {
+                            const cell = newRow.insertCell();
+                            cell.contentEditable = true;
+                            
+                            // Kaydedilen veri varsa kullan, yoksa boş bırak
+                            if (colIndex < rowData.length) {
+                                cell.innerText = rowData[colIndex] || '';
+                            } else {
+                                cell.innerText = '';
                             }
-                        });
+                        }
+                        
+                        // Son boş hücre ekle (+ Sütun Ekle alanı için)
+                        const emptyCell = newRow.insertCell();
+                        emptyCell.textContent = '';
+                        
+                        // Event listener'ları ekle
+                        addInputListenersToNewRow(newRow);
                     }
                 });
             }
@@ -1646,11 +1680,14 @@
             const data = [];
             const rows = table.querySelectorAll('tbody tr');
             rows.forEach(row => {
-                const rowData = [];
-                row.querySelectorAll('td').forEach(cell => {
-                    rowData.push(cell.innerText.trim());
-                });
-                data.push(rowData);
+                // "Satır Ekle" satırını kaydetme
+                if (!row.querySelector('.add-row-cell')) {
+                    const rowData = [];
+                    row.querySelectorAll('td').forEach(cell => {
+                        rowData.push(cell.innerText.trim());
+                    });
+                    data.push(rowData);
+                }
             });
             localStorage.setItem('priceTableData', JSON.stringify(data));
         }
@@ -1658,8 +1695,117 @@
         // Değişiklikleri dinle
         table.addEventListener('input', saveTableToStorage);
         
+        // Header'ları kaydetme
+        function saveTableHeaders() {
+            const table = document.getElementById('priceTable');
+            const thead = table.getElementsByTagName('thead')[0];
+            const headerData = {
+                row1: [],
+                row2: []
+            };
+            
+            // İlk satır header'ları (T-level'lar)
+            const headerRow1 = thead.rows[0];
+            for (let i = 0; i < headerRow1.cells.length; i++) {
+                const cell = headerRow1.cells[i];
+                if (!cell.classList.contains('add-col-header')) {
+                    headerData.row1.push({
+                        text: cell.textContent,
+                        colSpan: cell.colSpan || 1,
+                        className: cell.className
+                    });
+                }
+            }
+            
+            // İkinci satır header'ları (En-level'lar)
+            const headerRow2 = thead.rows[1];
+            for (let i = 0; i < headerRow2.cells.length; i++) {
+                const cell = headerRow2.cells[i];
+                if (!cell.classList.contains('add-col-header')) {
+                    headerData.row2.push({
+                        text: cell.textContent,
+                        className: cell.className
+                    });
+                }
+            }
+            
+            localStorage.setItem('tableHeaders', JSON.stringify(headerData));
+        }
+        
+        // Header'ları yükleme
+        function loadTableHeaders() {
+            const savedHeaders = localStorage.getItem('tableHeaders');
+            if (savedHeaders) {
+                const headerData = JSON.parse(savedHeaders);
+                const table = document.getElementById('priceTable');
+                const thead = table.getElementsByTagName('thead')[0];
+                
+                // Mevcut header'ları temizle (İlk sütun ve + Sütun Ekle hariç)
+                const headerRow1 = thead.rows[0];
+                const headerRow2 = thead.rows[1];
+                
+                // İlk satırı temizle (Ürün Adı ve + Sütun Ekle hariç)
+                const cellsToRemove1 = [];
+                for (let i = 1; i < headerRow1.cells.length; i++) {
+                    if (!headerRow1.cells[i].classList.contains('add-col-header')) {
+                        cellsToRemove1.push(headerRow1.cells[i]);
+                    }
+                }
+                cellsToRemove1.forEach(cell => headerRow1.removeChild(cell));
+                
+                // İkinci satırı temizle (İlk sütun ve + Sütun Ekle hariç)
+                const cellsToRemove2 = [];
+                for (let i = 1; i < headerRow2.cells.length; i++) {
+                    if (!headerRow2.cells[i].classList.contains('add-col-header')) {
+                        cellsToRemove2.push(headerRow2.cells[i]);
+                    }
+                }
+                cellsToRemove2.forEach(cell => headerRow2.removeChild(cell));
+                
+                // İlk satır header'ları yükle (Ürün Adı hariç)
+                headerData.row1.forEach((headerInfo, index) => {
+                    if (index > 0) { // İlk sütunu (Ürün Adı) atla
+                        const newHeader = document.createElement('th');
+                        newHeader.textContent = headerInfo.text;
+                        newHeader.className = headerInfo.className;
+                        if (headerInfo.colSpan > 1) {
+                            newHeader.colSpan = headerInfo.colSpan;
+                        }
+                        
+                        // + Sütun Ekle butonundan önce ekle
+                        const addColButton = headerRow1.querySelector('.add-col-header');
+                        if (addColButton) {
+                            headerRow1.insertBefore(newHeader, addColButton);
+                        } else {
+                            headerRow1.appendChild(newHeader);
+                        }
+                    }
+                });
+                
+                // İkinci satır header'ları yükle (İlk sütun hariç)
+                headerData.row2.forEach((headerInfo, index) => {
+                    if (index > 0) { // İlk sütunu atla
+                        const newHeader = document.createElement('th');
+                        newHeader.textContent = headerInfo.text;
+                        newHeader.className = headerInfo.className;
+                        
+                        // + Sütun Ekle butonundan önce ekle
+                        const addColButton = headerRow2.querySelector('.add-col-header');
+                        if (addColButton) {
+                            headerRow2.insertBefore(newHeader, addColButton);
+                        } else {
+                            headerRow2.appendChild(newHeader);
+                        }
+                    }
+                });
+            }
+        }
+        
         // Sayfa yüklendiğinde verileri yükle
         window.addEventListener('DOMContentLoaded', () => {
+            // Önce header'ları yükle
+            loadTableHeaders();
+            // Sonra tablo verilerini yükle
             loadTableFromStorage();
             // Kısa bir gecikme ile butonları ekle (tablo yüklendikten sonra)
             setTimeout(() => {
@@ -1704,9 +1850,28 @@
             // Yeni "Satır Ekle" satırını tekrar ekle
             addTableRowButton();
             
-            // Tabloyu kaydet ve ürün listesini güncelle
+            // Tabloyu hemen kaydet
             saveTableToStorage();
             updateProductList();
+            
+            // Yeni satıra input event listener ekle
+            addInputListenersToNewRow(newRow);
+        }
+        
+        // Yeni satıra input event listener ekleme
+        function addInputListenersToNewRow(row) {
+            const cells = row.querySelectorAll('td[contenteditable="true"]');
+            cells.forEach(cell => {
+                cell.addEventListener('input', function() {
+                    saveTableToStorage();
+                    updateProductList();
+                });
+                
+                cell.addEventListener('blur', function() {
+                    saveTableToStorage();
+                    updateProductList();
+                });
+            });
         }
         
         // Tablo satır silme
@@ -1714,10 +1879,24 @@
             const table = document.getElementById('priceTable');
             const tbody = table.getElementsByTagName('tbody')[0];
             
-            if (tbody.rows.length > 1) {
-                tbody.deleteRow(tbody.rows.length - 1);
-                saveTableToStorage();
-                updateProductList();
+            // + Satır Ekle hariç gerçek satır sayısını bul
+            const realRows = tbody.querySelectorAll('tr:not(.add-row-cell)');
+            
+            if (realRows.length > 1) {
+                // Son gerçek satırı sil (+ Satır Ekle hariç)
+                let lastRealRow = null;
+                for (let i = tbody.rows.length - 1; i >= 0; i--) {
+                    if (!tbody.rows[i].querySelector('.add-row-cell')) {
+                        lastRealRow = tbody.rows[i];
+                        break;
+                    }
+                }
+                
+                if (lastRealRow) {
+                    tbody.removeChild(lastRealRow);
+                    saveTableToStorage();
+                    updateProductList();
+                }
             } else {
                 alert('En az bir satır olmalı!');
             }
@@ -1840,6 +2019,17 @@
                         const newCell = row.insertCell();
                         newCell.contentEditable = true;
                         newCell.textContent = '';
+                        
+                        // Yeni hücreye event listener ekle
+                        newCell.addEventListener('input', function() {
+                            saveTableToStorage();
+                            saveTableHeaders();
+                        });
+                        
+                        newCell.addEventListener('blur', function() {
+                            saveTableToStorage();
+                            saveTableHeaders();
+                        });
                     }
                     
                     // Son boş hücreyi tekrar ekle
@@ -1854,7 +2044,9 @@
             // Header düzenleme listener'larını güncelle
             addHeaderEditListeners();
             
+            // Hem tablo verilerini hem header'ları kaydet
             saveTableToStorage();
+            saveTableHeaders();
         }
         
         // Eski fonksiyonu popup çağıracak şekilde güncelle
@@ -1877,30 +2069,51 @@
                 return;
             }
             
-            // Son T-level'ı sil
-            const lastTHeader = headerRow1.cells[headerRow1.cells.length - 1];
+            // Son T-level'ı sil (+ Sütun Ekle hariç)
+            let lastTHeader = null;
+            for (let i = headerRow1.cells.length - 1; i >= 0; i--) {
+                if (!headerRow1.cells[i].classList.contains('add-col-header')) {
+                    lastTHeader = headerRow1.cells[i];
+                    break;
+                }
+            }
+            
+            if (!lastTHeader) return;
+            
             const colSpan = parseInt(lastTHeader.colSpan) || 1;
             
             // Header'dan sil
             headerRow1.removeChild(lastTHeader);
             
-            // İkinci satırdan En başlıklarını sil
+            // İkinci satırdan En başlıklarını sil (+ Sütun Ekle hariç)
             for (let i = 0; i < colSpan; i++) {
-                if (headerRow2.cells.length > 1) {
-                    headerRow2.removeChild(headerRow2.cells[headerRow2.cells.length - 1]);
-                }
-            }
-            
-            // Tüm satırlardan son hücreleri sil
-            for (let row of tbody.rows) {
-                for (let i = 0; i < colSpan; i++) {
-                    if (row.cells.length > 1) {
-                        row.removeChild(row.cells[row.cells.length - 1]);
+                for (let j = headerRow2.cells.length - 1; j >= 0; j--) {
+                    if (!headerRow2.cells[j].classList.contains('add-col-header')) {
+                        headerRow2.removeChild(headerRow2.cells[j]);
+                        break;
                     }
                 }
             }
             
+            // Tüm satırlardan son hücreleri sil (+ Satır Ekle ve boş hücreler hariç)
+            for (let row of tbody.rows) {
+                if (!row.querySelector('.add-row-cell')) {
+                    for (let i = 0; i < colSpan; i++) {
+                        // Son hücreyi bul (boş hücre değil)
+                        for (let j = row.cells.length - 1; j >= 0; j--) {
+                            const cell = row.cells[j];
+                            if (cell.contentEditable === 'true') {
+                                row.removeChild(cell);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Hem tablo verilerini hem header'ları kaydet
             saveTableToStorage();
+            saveTableHeaders();
         }
         
         // Mevcut T-level sayısını hesapla
@@ -2054,7 +2267,9 @@
                 updateDropdownOptions();
             }
             
+            // Hem tablo verilerini hem header'ları kaydet
             saveTableToStorage();
+            saveTableHeaders();
         }
         
         // Dropdown seçeneklerini güncelle (En-header'lar değiştiğinde)
