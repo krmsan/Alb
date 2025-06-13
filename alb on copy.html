@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ürün Fiyat Tablosu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+            padding: 5px;
+            display: block;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #444;
+            border-collapse: collapse;
+            padding: 1px 2px;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 100%;
+            font-size: 8px;
+        }
+
+        th {
+            background: #ddd;
+            white-space: nowrap;
+            min-width: 28px;
+            font-size: 9px;
+        }
+        
+        td {
+            white-space: nowrap;
+            min-width: 28px;
+        }
+        .wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+            
+        .table-container {
+            overflow-x: auto;
+            width: calc(100% - 10px);
+            margin-bottom: 8px;
+        }
+        .flexbox {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        #dynamicContainers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+        .topmaliyet {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .total-box {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border: 2px solid #28a745;
+            border-radius: 6px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            text-align: center;
+            flex: 1;
+            min-width: 180px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .total-box-indicators {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .total-box-indicators .box-indicator {
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+        }
+        
+        .total-box-indicators span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        
+        .total-box.maliyet {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-color: #ffc107;
+        }
+        
+        .box-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .box-indicator.box1 { background: #007bff; border-color: #007bff; }
+        .box-indicator.box2 { background: #28a745; border-color: #28a745; }
+        .box-indicator.box3 { background: #ffc107; border-color: #ffc107; color: #000; }
+        .box-indicator.box4 { background: #dc3545; border-color: #dc3545; }
+        .box-indicator.box5 { background: #6f42c1; border-color: #6f42c1; }
+        .box-indicator.box6 { background: #fd7e14; border-color: #fd7e14; }
+        .box-indicator.box7 { background: #20c997; border-color: #20c997; }
+        .box-indicator.box8 { background: #e83e8c; border-color: #e83e8c; }
+        
+        .cost-options {
+            margin: 10px 0;
+            padding: 8px 10px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 6px;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        
+        .option-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 3px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: #856404;
+            margin: 0;
+        }
+        
+        .radio-label:hover {
+            color: #5a4103;
+        }
+        
+        .radio-label input[type="radio"] {
+            width: auto;
+            margin: 0 5px 0 0;
+            padding: 0;
+        }
+        
+        .maliyet-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .maliyet-left {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .maliyet-right {
+            flex: 0 0 auto;
+            width: 120px;
+            border-left: 2px solid rgba(255, 193, 7, 0.6);
+            padding-left: 8px;
+        }
+        
+        .cost-options-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .option-group-compact {
+            margin-bottom: 0;
+        }
+        
+        .radio-group-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        
+        .radio-label-compact {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 8px;
+            color: #856404;
+            margin: 0;
+            white-space: nowrap;
+        }
+        
+        .radio-label-compact:hover {
+            color: #5a4103;
+        }
+        
+        .radio-label-compact input[type="radio"] {
+            width: auto;
+            margin: 0 3px 0 0;
+            padding: 0;
+        }
+        
+
+        
+        .radio-group-horizontal {
+            display: flex;
+            gap: 6px;
+            margin-top: 2px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .container-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .container-controls-small {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .control-btn-small {
+            width: 18px;
+            height: 18px;
+            border: 1px solid;
+            border-radius: 3px;
+            background: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn-small.add {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        
+        .control-btn-small.add:hover {
+            background: #28a745;
+            color: white;
+        }
+        
+        .control-btn-small.remove {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .control-btn-small.remove:hover {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .control-btn-small:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .add-container-btn {
+            width: 160px;
+            height: 120px;
+            border: 2px dashed #28a745;
+            border-radius: 6px;
+            background: #f8fff9;
+            color: #28a745;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            max-width: 160px;
+        }
+
+        .add-container-btn:hover {
+            background: #e8f5e9;
+            border-color: #1e7e34;
+        }
+        .calculation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            width: 160px;
+            min-width: 160px;
+            max-width: 160px;
+            box-sizing: border-box;
+        }
+        
+        .calculation-container.color-1 { border-color: #007bff; }
+        .calculation-container.color-2 { border-color: #28a745; }
+        .calculation-container.color-3 { border-color: #ffc107; }
+        .calculation-container.color-4 { border-color: #dc3545; }
+        .calculation-container.color-5 { border-color: #6f42c1; }
+        .calculation-container.color-6 { border-color: #fd7e14; }
+        .calculation-container.color-7 { border-color: #20c997; }
+        .calculation-container.color-8 { border-color: #e83e8c; }
+
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 11px;
+        }
+
+        select,
+        input {
+            padding: 4px 6px;
+            font-size: 10px;
+            width: calc(100% - 12px);
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background-color: white;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        .result {
+            font-weight: bold;
+            font-size: 11px;
+            margin-top: 6px;
+            padding: 4px 6px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 3px;
+            color: #0066cc;
+            text-align: center;
+        }
+        #topresult, #genelresult {
+            font-weight: bold;
+            font-size: 14px;
+            color: #087522;
+            margin: 0;
+            padding-top: 6px;
+            border-top: 2px solid #28a745;
+        }
+        .t-header {
+            background: #bbb;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrapper">
+    <!-- Soldaki tablo -->
+    <div class="table-container">
+    <table id="priceTable">
+        <thead>
+            <tr>
+                <th rowspan="2">Ürün Adı</th>
+                <th colspan="1" class="t-header">T1</th>
+                <th colspan="1" class="t-header">T2</th>
+                <th colspan="1" class="t-header">T3</th>
+                <th colspan="5" class="t-header">T4</th>
+                <th colspan="5" class="t-header">T5</th>
+                <th colspan="5" class="t-header">T6</th>
+                <th colspan="5" class="t-header">T7</th>
+                <th colspan="5" class="t-header">T8</th>
+            </tr>
+            <tr>
+                <th>En0</th>
+                <th>En0</th>
+                <th>En0</th>
+                <th>En0</th><th>En1</th><th>En2</th><th>En3</th><th>En4</th>
+                <th>En0</th><th>En1</th><th>En2</th><th>En3</th><th>En4</th>
+                <th>En0</th><th>En1</th><th>En2</th><th>En3</th><th>En4</th>
+                <th>En0</th><th>En1</th><th>En2</th><th>En3</th><th>En4</th>
+                <th>En0</th><th>En1</th><th>En2</th><th>En3</th><th>En4</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td contenteditable="true">Seciniz</td>
+                <td contenteditable="true">0</td>
+                <td contenteditable="true">0</td>
+                <td contenteditable="true">0</td>
+                <td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td>
+                <td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td>
+                <td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td>
+                <td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td>
+                <td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td><td contenteditable="true">0</td>
+            </tr>
+            <tr>
+                <td contenteditable="true">Plank</td>
+                <td contenteditable="true">0</td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true">Cloth</td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true">Leather</td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true">Metal Bar</td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <div>
+<div class="flexbox">
+    <!-- Dinamik Konteynerler -->
+    <div id="dynamicContainers"></div>
+</div>
+
+<div class="topmaliyet">
+    <div class="total-box">
+        <h4 style="margin: 0 0 6px 0; color: #087522; font-size: 12px;">🔧 Kaynaklar</h4>
+        <div class="total-box-indicators"></div>
+        <div id="topresult">Toplam Fiyat: 0</div>
+    </div>
+    <div class="total-box maliyet">
+        <div class="maliyet-content">
+            <div class="maliyet-left">
+                <h4 style="margin: 0 0 6px 0; color: #856404; font-size: 12px;">💰 Toplam Maliyet</h4>
+                <div class="total-box-indicators"></div>
+                <div id="genelresult" style="margin-top: 6px;">Toplam Fiyat: 0</div>
+            </div>
+            
+            <div class="maliyet-right">
+                <div class="cost-options-compact">
+                    <div class="option-group-compact">
+                        <label for="premiumSelect" style="font-size: 9px; margin-bottom: 2px; color: #856404; font-weight: 600;">Vergi:</label>
+                        <select id="premiumSelect" style="width: 100%; padding: 2px 4px; font-size: 9px; border: 1px solid #ffc107; border-radius: 3px; background: white;">
+                            <option value="">Vergisiz</option>
+                            <option value="premium">Premium (+%4)</option>
+                            <option value="non-premium">Premium Değil (+%8)</option>
+        </select>
+                    </div>
+                    
+                    <div class="option-group-compact">
+                        <label style="font-size: 9px; margin-bottom: 2px; color: #856404; font-weight: 600;">İşlem Ücreti:</label>
+                        <div class="radio-group-horizontal">
+                            <label class="radio-label-compact">
+                                <input type="radio" name="feeOption" value="" checked style="margin-right: 3px;">
+                                <span style="font-size: 8px;">Ücretsiz</span>
+                            </label>
+                            <label class="radio-label-compact">
+                                <input type="radio" name="feeOption" value="fee" style="margin-right: 3px;">
+                                <span style="font-size: 8px;">Fee (+%2.5)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+    
+    <script>
+        let containerCount = 4;
+        
+                // Dinamik konteyner oluşturma fonksiyonu
+        function createContainer(index) {
+            const container = document.createElement('div');
+            container.className = `calculation-container color-${index}`;
+            container.id = `container${index}`;
+            
+            const removeBtn = containerCount > 1 ? 
+                `<button class="control-btn-small remove" onclick="removeContainer(${index})" title="Kutuyu Sil">×</button>` : '';
+            
+            const addBtn = index === containerCount && containerCount < 8 ? 
+                `<button class="control-btn-small add" onclick="addContainer()" title="Yeni Kutu Ekle">+</button>` : '';
+            
+            container.innerHTML = `
+                <div class="container-header">
+                    <span class="container-title">Kutu ${index}</span>
+                    <div class="container-controls-small">
+                        ${addBtn}
+                        ${removeBtn}
+                    </div>
+    </div>
+                
+                <label for="productSelect${index}">Ürün Seçiniz:</label>
+                <select id="productSelect${index}"></select>
+
+                <label for="levelSelect${index}">Seviye Seçiniz (T1 - T8):</label>
+                <select id="levelSelect${index}">
+            <option value="1">T1</option>
+            <option value="2">T2</option>
+            <option value="3">T3</option>
+            <option value="4">T4</option>
+            <option value="5">T5</option>
+            <option value="6">T6</option>
+            <option value="7">T7</option>
+            <option value="8">T8</option>
+        </select>
+
+                <label for="subLevelSelect${index}">Alt Seviye Seçiniz:</label>
+                <select id="subLevelSelect${index}">
+                    <option value="0">En0</option>
+                    <option value="1">En1</option>
+                    <option value="2">En2</option>
+                    <option value="3">En3</option>
+                    <option value="4">En4</option>
+                </select>
+
+                <label for="quantityInput${index}">Miktar Giriniz:</label>
+                <input type="number" id="quantityInput${index}" min="0" value="1" />
+
+                <label for="result${index}">Toplam Fiyat:</label>
+                <div class="result" id="result${index}">0</div>
+            `;
+            
+            return container;
+        }
+        
+        // Artı kutusu oluşturma
+        function createAddButton() {
+            if (containerCount >= 8) return null;
+            
+            const addContainer = document.createElement('div');
+            addContainer.className = 'add-container-btn';
+            addContainer.innerHTML = '+ Yeni Kutu Ekle';
+            addContainer.onclick = addContainer;
+            
+            return addContainer;
+        }
+
+        // Mevcut değerleri kaydetme
+        function saveCurrentValues() {
+            const savedValues = {};
+            for (let i = 1; i <= containerCount; i++) {
+                const productSelect = document.getElementById(`productSelect${i}`);
+                const levelSelect = document.getElementById(`levelSelect${i}`);
+                const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                const quantityInput = document.getElementById(`quantityInput${i}`);
+                
+                if (productSelect && levelSelect && subLevelSelect && quantityInput) {
+                    savedValues[i] = {
+                        product: productSelect.value,
+                        level: levelSelect.value,
+                        subLevel: subLevelSelect.value,
+                        quantity: quantityInput.value
+                    };
+                }
+            }
+            return savedValues;
+        }
+
+        // Kayıtlı değerleri geri yükleme
+        function restoreValues(savedValues) {
+            for (let i = 1; i <= containerCount; i++) {
+                if (savedValues[i]) {
+                    const productSelect = document.getElementById(`productSelect${i}`);
+                    const levelSelect = document.getElementById(`levelSelect${i}`);
+                    const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                    const quantityInput = document.getElementById(`quantityInput${i}`);
+                    
+                    if (productSelect) productSelect.value = savedValues[i].product;
+                    if (levelSelect) levelSelect.value = savedValues[i].level;
+                    if (subLevelSelect) subLevelSelect.value = savedValues[i].subLevel;
+                    if (quantityInput) quantityInput.value = savedValues[i].quantity;
+                }
+            }
+        }
+
+        // Tüm konteynerleri başlatma
+        function initializeContainers() {
+            const savedValues = saveCurrentValues();
+            const dynamicContainers = document.getElementById('dynamicContainers');
+            dynamicContainers.innerHTML = '';
+            
+            for (let i = 1; i <= containerCount; i++) {
+                const container = createContainer(i);
+                dynamicContainers.appendChild(container);
+            }
+            
+            updateProductList();
+            // Alt seviye seçeneklerini güncelle
+            for (let i = 1; i <= containerCount; i++) {
+                updateSubLevelOptions(i);
+            }
+            restoreValues(savedValues);
+            addEventListeners();
+            calculateTotal();
+            updateTotalBoxIndicators();
+            updateTotalBoxSizes();
+        }
+
+        // Event listener'ları ekleme
+        function addEventListeners() {
+            for (let i = 1; i <= containerCount; i++) {
+                const productSelect = document.getElementById(`productSelect${i}`);
+                const levelSelect = document.getElementById(`levelSelect${i}`);
+                const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                const quantityInput = document.getElementById(`quantityInput${i}`);
+                
+                if (productSelect) {
+                    productSelect.addEventListener('change', calculateTotal);
+                    productSelect.addEventListener('change', saveContainerValues);
+                }
+                if (levelSelect) {
+                    levelSelect.addEventListener('change', () => {
+                        updateSubLevelOptions(i);
+                        calculateTotal();
+                        saveContainerValues();
+                    });
+                }
+                if (subLevelSelect) {
+                    subLevelSelect.addEventListener('change', calculateTotal);
+                    subLevelSelect.addEventListener('change', saveContainerValues);
+                }
+                if (quantityInput) {
+                    quantityInput.addEventListener('input', calculateTotal);
+                    quantityInput.addEventListener('input', saveContainerValues);
+                }
+            }
+        }
+
+        // Alt seviye seçeneklerini T-seviyesine göre güncelle
+        function updateSubLevelOptions(containerIndex) {
+            const levelSelect = document.getElementById(`levelSelect${containerIndex}`);
+            const subLevelSelect = document.getElementById(`subLevelSelect${containerIndex}`);
+            
+            if (!levelSelect || !subLevelSelect) return;
+            
+            const selectedLevel = parseInt(levelSelect.value);
+            const currentValue = subLevelSelect.value;
+            
+            // Önce tüm seçenekleri temizle
+            subLevelSelect.innerHTML = '';
+            
+            if (selectedLevel <= 3) {
+                // T1, T2, T3 için sadece En0
+                const option = document.createElement('option');
+                option.value = '0';
+                option.textContent = 'En0';
+                subLevelSelect.appendChild(option);
+                subLevelSelect.value = '0';
+            } else {
+                // T4, T5, T6, T7, T8 için En0, En1, En2, En3, En4
+                for (let i = 0; i <= 4; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString();
+                    option.textContent = `En${i}`;
+                    subLevelSelect.appendChild(option);
+                }
+                // Mümkünse önceki değeri koru
+                if (['0', '1', '2', '3', '4'].includes(currentValue)) {
+                    subLevelSelect.value = currentValue;
+                } else {
+                    subLevelSelect.value = '0';
+                }
+            }
+        }
+
+        // Ürünleri tablo satırlarından çekip select'e ekle
+        function updateProductList() {
+            const table = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
+            
+            for (let i = 1; i <= containerCount; i++) {
+                const select = document.getElementById(`productSelect${i}`);
+                if (select) {
+                    select.innerHTML = '';
+
+            for (let row of table.rows) {
+                const productName = row.cells[0].textContent.trim();
+                if (productName) {
+                    let option = document.createElement('option');
+                    option.value = productName;
+                    option.textContent = productName;
+                            select.appendChild(option);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Hesaplama fonksiyonu
+        function calculateTotal() {
+            let toptotal = 0;
+            let geneltotal = 0;
+            
+            for (let i = 1; i <= containerCount; i++) {
+                const productSelect = document.getElementById(`productSelect${i}`);
+                const levelSelect = document.getElementById(`levelSelect${i}`);
+                const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                const quantityInput = document.getElementById(`quantityInput${i}`);
+                const resultDiv = document.getElementById(`result${i}`);
+                
+                if (!productSelect || !levelSelect || !subLevelSelect || !quantityInput || !resultDiv) continue;
+                
+                const productName = productSelect.value;
+                const level = parseInt(levelSelect.value);
+                const subLevel = parseInt(subLevelSelect.value);
+                const quantity = parseFloat(quantityInput.value);
+                const table = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
+                let price = 0;
+
+                for (let row of table.rows) {
+                    if (row.cells[0].textContent.trim() === productName) {
+                        let columnIndex;
+                        
+                        if (level <= 3) {
+                            // T1, T2, T3: sadece En0 var (kolonlar 1, 2, 3)
+                            columnIndex = level;
+                        } else {
+                            // T4-T8: En0, En1, En2, En3, En4 var
+                            // T4 başlangıcı: kolon 4 (3 + 1)
+                            columnIndex = 3 + (level - 4) * 5 + (subLevel + 1);
+                        }
+                        
+                        const priceText = row.cells[columnIndex].textContent.trim();
+                        price = parseFloat(priceText) || 0;
+                        break;
+                    }
+                }
+                
+                const total = price * quantity;
+                resultDiv.textContent = `${total.toFixed(2)}`;
+                
+                if (i == 1 || i == 2) {
+                    toptotal += total;
+                }
+                geneltotal += total;
+            }
+            
+            // Premium ve fee hesaplamaları
+            const premiumSelect = document.getElementById('premiumSelect');
+            const feeRadios = document.querySelectorAll('input[name="feeOption"]');
+            
+            let finalTotal = geneltotal;
+            let premiumMultiplier = 1;
+            let feeMultiplier = 1;
+            
+            // Premium hesaplama
+            if (premiumSelect && premiumSelect.value) {
+                if (premiumSelect.value === 'premium') {
+                    premiumMultiplier = 1.04; // +%4
+                } else if (premiumSelect.value === 'non-premium') {
+                    premiumMultiplier = 1.08; // +%8
+                }
+            }
+            
+            // Fee hesaplama
+            const selectedFee = Array.from(feeRadios).find(radio => radio.checked);
+            if (selectedFee && selectedFee.value === 'fee') {
+                feeMultiplier = 1.025; // +%2.5
+            }
+            
+            finalTotal = geneltotal * premiumMultiplier * feeMultiplier;
+            
+            document.getElementById(`topresult`).textContent = `Kaynaklar Fiyati: ${toptotal.toFixed(2)}`;
+            document.getElementById(`genelresult`).textContent = `Toplam Maliyet: ${finalTotal.toFixed(2)}`;
+        }
+
+        // Toplam kutuları içindeki göstergeleri güncelleme
+        function updateTotalBoxIndicators() {
+            // Kaynaklar kutusundaki göstergeler (ilk 2 kutu)
+            const resourcesBox = document.querySelector('.total-box:first-child .total-box-indicators');
+            if (resourcesBox) {
+                let resourcesHTML = '';
+                for (let i = 1; i <= Math.min(2, containerCount); i++) {
+                    if (i > 1) resourcesHTML += '<span>+</span>';
+                    resourcesHTML += `<div class="box-indicator box${i}">${i}</div>`;
+                }
+                resourcesBox.innerHTML = resourcesHTML;
+            }
+            
+            // Toplam kutusundaki göstergeler (tüm kutular)
+            const totalBox = document.querySelector('.total-box.maliyet .total-box-indicators');
+            if (totalBox) {
+                let totalHTML = '';
+                for (let i = 1; i <= containerCount; i++) {
+                    if (i > 1) totalHTML += '<span>+</span>';
+                    totalHTML += `<div class="box-indicator box${i}">${i}</div>`;
+                }
+                totalBox.innerHTML = totalHTML;
+            }
+        }
+
+        // Toplam kutularının boyutunu güncelleme
+        function updateTotalBoxSizes() {
+            const topmaliyetContainer = document.querySelector('.topmaliyet');
+            const resourcesBox = topmaliyetContainer.querySelector('.total-box:first-child');
+            const totalBox = topmaliyetContainer.querySelector('.total-box:last-child');
+            
+            // Her kutu için sabit genişlik ve gap
+            const containerWidth = 160; // Her kutu genişliği
+            const gapSize = 8; // Kutular arası boşluk
+            
+            // Kaynaklar kutusu: Her zaman 2 kutu genişliğinde (160 + 8 + 160 = 328px)
+            const resourcesWidth = 2 * containerWidth + gapSize; // 328px
+            
+            // Toplam kutusu: Kalan kutuların genişliğinde + ekstra genişlik vergi/fee seçenekleri için
+            const remainingBoxes = Math.max(1, containerCount - 2); // En az 1 kutu
+            const baseTotalWidth = remainingBoxes * containerWidth + Math.max(0, remainingBoxes - 1) * gapSize;
+            const totalWidth = Math.max(baseTotalWidth, 300); // En az 300px genişlik
+            
+            if (resourcesBox) {
+                resourcesBox.style.width = `${resourcesWidth}px`;
+                resourcesBox.style.maxWidth = `${resourcesWidth}px`;
+                resourcesBox.style.minWidth = `${resourcesWidth}px`;
+            }
+            
+            if (totalBox) {
+                totalBox.style.width = `${totalWidth}px`;
+                totalBox.style.maxWidth = `${totalWidth}px`;
+                totalBox.style.minWidth = `${totalWidth}px`;
+            }
+            
+            // Ana konteyner genişliğini toplam genişliğe göre ayarla
+            const totalContainerWidth = resourcesWidth + totalWidth + gapSize; // İki kutu + aralarındaki gap
+            if (topmaliyetContainer) {
+                topmaliyetContainer.style.width = `${Math.min(totalContainerWidth, window.innerWidth - 20)}px`;
+                topmaliyetContainer.style.maxWidth = '100%';
+                topmaliyetContainer.style.justifyContent = 'center';
+                topmaliyetContainer.style.gap = '8px';
+            }
+        }
+
+        // Konteyner ekleme
+        function addContainer() {
+            if (containerCount < 8) {
+                containerCount++;
+                initializeContainers();
+                saveContainerValues();
+            }
+        }
+
+        // Konteyner çıkarma
+        function removeContainer(indexToRemove = null) {
+            if (containerCount > 1) {
+                const savedValues = saveCurrentValues();
+                
+                // Eğer belirli bir index silinecekse, değerleri yeniden düzenle
+                if (indexToRemove && indexToRemove < containerCount) {
+                    const newSavedValues = {};
+                    let newIndex = 1;
+                    
+                    for (let i = 1; i <= containerCount; i++) {
+                        if (i !== indexToRemove && savedValues[i]) {
+                            newSavedValues[newIndex] = savedValues[i];
+                            newIndex++;
+                        }
+                    }
+                    
+                    containerCount--;
+                    const dynamicContainers = document.getElementById('dynamicContainers');
+                    dynamicContainers.innerHTML = '';
+                    
+                    for (let i = 1; i <= containerCount; i++) {
+                        const container = createContainer(i);
+                        dynamicContainers.appendChild(container);
+                    }
+                    
+        updateProductList();
+                     restoreValues(newSavedValues);
+                     addEventListeners();
+                     calculateTotal();
+                     updateTotalBoxIndicators();
+                     updateTotalBoxSizes();
+                    saveContainerValues();
+                } else {
+                    // Normal silme (son kutu)
+                    containerCount--;
+                    initializeContainers();
+                    saveContainerValues();
+                }
+            }
+        }
+
+
+
+                        // Kutu değerlerini localStorage'a kaydetme
+        function saveContainerValues() {
+            const containerData = {
+                count: containerCount,
+                values: {}
+            };
+            
+            for (let i = 1; i <= containerCount; i++) {
+                const productSelect = document.getElementById(`productSelect${i}`);
+                const levelSelect = document.getElementById(`levelSelect${i}`);
+                const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                const quantityInput = document.getElementById(`quantityInput${i}`);
+                
+                if (productSelect && levelSelect && subLevelSelect && quantityInput) {
+                    containerData.values[i] = {
+                        product: productSelect.value,
+                        level: levelSelect.value,
+                        subLevel: subLevelSelect.value,
+                        quantity: quantityInput.value
+                    };
+                }
+            }
+            
+            localStorage.setItem('containerData', JSON.stringify(containerData));
+        }
+
+        // localStorage'dan kutu değerlerini geri yükleme
+        function loadContainerValues() {
+            const savedData = localStorage.getItem('containerData');
+            if (savedData) {
+                try {
+                    const containerData = JSON.parse(savedData);
+                    
+                    // Kaydedilen kutu sayısını geri yükle
+                    if (containerData.count) {
+                        containerCount = containerData.count;
+                    }
+                    
+                    // Konteynerleri oluştur
+                    initializeContainers();
+                    
+                    // Değerleri geri yükle
+                    if (containerData.values) {
+                        setTimeout(() => { // DOM'un hazır olmasını bekle
+                            for (let i = 1; i <= containerCount; i++) {
+                                if (containerData.values[i]) {
+                                    const productSelect = document.getElementById(`productSelect${i}`);
+                                    const levelSelect = document.getElementById(`levelSelect${i}`);
+                                    const subLevelSelect = document.getElementById(`subLevelSelect${i}`);
+                                    const quantityInput = document.getElementById(`quantityInput${i}`);
+                                    
+                                    if (productSelect) productSelect.value = containerData.values[i].product || '';
+                                    if (levelSelect) {
+                                        levelSelect.value = containerData.values[i].level || '1';
+                                        // Alt seviye seçeneklerini güncelle
+                                        updateSubLevelOptions(i);
+                                    }
+                                    if (subLevelSelect) subLevelSelect.value = containerData.values[i].subLevel || '0';
+                                    if (quantityInput) quantityInput.value = containerData.values[i].quantity || '1';
+                                }
+                            }
+                            calculateTotal();
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error('Kaydedilen veriler yüklenirken hata:', error);
+                    initializeContainers();
+                }
+            } else {
+                initializeContainers();
+            }
+        }
+
+
+
+        // Premium ve fee seçeneklerini kaydetme/yükleme
+        function savePremiumFeeOptions() {
+            const premiumSelect = document.getElementById('premiumSelect');
+            const feeRadios = document.querySelectorAll('input[name="feeOption"]');
+            const selectedFee = Array.from(feeRadios).find(radio => radio.checked);
+            
+            const options = {
+                premium: premiumSelect ? premiumSelect.value : '',
+                fee: selectedFee ? selectedFee.value : ''
+            };
+            
+            localStorage.setItem('premiumFeeOptions', JSON.stringify(options));
+        }
+        
+        function loadPremiumFeeOptions() {
+            const savedOptions = localStorage.getItem('premiumFeeOptions');
+            if (savedOptions) {
+                try {
+                    const options = JSON.parse(savedOptions);
+                    
+                    const premiumSelect = document.getElementById('premiumSelect');
+                    if (premiumSelect && options.premium !== undefined) {
+                        premiumSelect.value = options.premium;
+                    }
+                    
+                    const feeRadios = document.querySelectorAll('input[name="feeOption"]');
+                    feeRadios.forEach(radio => {
+                        if (radio.value === options.fee) {
+                            radio.checked = true;
+                        }
+                    });
+                } catch (error) {
+                    console.error('Premium/Fee seçenekleri yüklenirken hata:', error);
+                }
+            }
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // Önce tablo verilerini yükle
+            loadTableFromStorage();
+            
+            // Sonra kutu verilerini yükle (bu şekilde ürün listesi doğru olur)
+            loadContainerValues();
+            
+            // Premium ve fee seçeneklerini yükle
+            loadPremiumFeeOptions();
+            
+            // Tablo değişikliklerini dinle
+        document.getElementById('priceTable').addEventListener('input', () => {
+            updateProductList();
+            calculateTotal();
+            });
+
+            // Premium ve fee seçeneklerini dinle
+            const premiumSelect = document.getElementById('premiumSelect');
+            if (premiumSelect) {
+                premiumSelect.addEventListener('change', () => {
+                    calculateTotal();
+                    savePremiumFeeOptions();
+                });
+            }
+            
+            const feeRadios = document.querySelectorAll('input[name="feeOption"]');
+            feeRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    calculateTotal();
+                    savePremiumFeeOptions();
+                });
+            });
+
+            // Pencere boyutu değiştiğinde kutular yeniden boyutlandır
+            window.addEventListener('resize', updateTotalBoxSizes);
+        });
+    </script>
+    
+    <script>
+        const table = document.getElementById('priceTable');
+        
+        // Verileri tabloya uygula
+        function loadTableFromStorage() {
+            const savedData = localStorage.getItem('priceTableData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach((row, rowIndex) => {
+                    const cells = row.querySelectorAll('td');
+                    if (data[rowIndex]) {
+                        data[rowIndex].forEach((cellText, colIndex) => {
+                            if (cells[colIndex]) {
+                                cells[colIndex].innerText = cellText;
+                            }
+                        });
+                    }
+                });
+            }
+        }
+        
+        // Tabloyu oku ve localStorage'a kaydet
+        function saveTableToStorage() {
+            const data = [];
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('td').forEach(cell => {
+                    rowData.push(cell.innerText.trim());
+                });
+                data.push(rowData);
+            });
+            localStorage.setItem('priceTableData', JSON.stringify(data));
+        }
+        
+        // Değişiklikleri dinle
+        table.addEventListener('input', saveTableToStorage);
+        
+        // Sayfa yüklendiğinde verileri yükle
+        window.addEventListener('DOMContentLoaded', loadTableFromStorage);
+    </script>
+
+</body>
+
+</html>
+</html>
