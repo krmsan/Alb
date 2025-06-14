@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+  /* Table Header Colors - T-headers (first row) */
+  --color-table-product: #a5a6a4;
+  --color-table-t1: #343d44;
+  --color-table-t2: #6d5649;
+  --color-table-t3: #3f572d;
+  --color-table-t4: #3c647e;
+  --color-table-t5: #832b27;
+  --color-table-t6: #c06e31;
+  --color-table-t7: #ceb04a;
+  --color-table-t8: #cfd0d1;
+  
+  /* En-header Colors (second row) */
+  --color-en-1: #343d44;
+  --color-en-2: #6d5649;
+  --color-en-3: #3f572d;
+  --color-en-4: #3c647e;
+  --color-en-5: #4ed376;
+  --color-en-6: #2ed3d2;
+  --color-en-7: #a371d7;
+  --color-en-8: #cfd053;
+  --color-en-9: #832b27;
+  --color-en-10: #5ed280;
+  --color-en-11: #2ed3d2;
+  --color-en-12: #a371d7;
+  --color-en-13: #cfd053;
+  --color-en-14: #c06e31;
+  --color-en-15: #5ed280;
+  --color-en-16: #2ed3d2;
+  --color-en-17: #a371d7;
+  --color-en-18: #cfd053;
+  --color-en-19: #ceb04a;
+  --color-en-20: #5ed280;
+  --color-en-21: #2ed3d2;
+  --color-en-22: #a371d7;
+  --color-en-23: #cfd053;
+  --color-en-24: #cfd0d1;
+  --color-en-25: #5ed280;
+  --color-en-26: #2ed3d2;
+  --color-en-27: #a371d7;
+  --color-en-28: #cfd053;
+  
+  /* Box Indicator Colors */
+  --color-box-1: #007bff;
+  --color-box-2: #28a745;
+  --color-box-3: #ffc107;
+  --color-box-4: #dc3545;
+  --color-box-5: #6f42c1;
+  --color-box-6: #fd7e14;
+  --color-box-7: #20c997;
+  --color-box-8: #e83e8c;
+  
+  /* UI Colors */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-success: #28a745;
+  --color-success-hover: #218838;
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #5a6268;
+  
+  /* Background Colors */
+  --color-bg-light: #f8f9fa;
+  --color-bg-lighter: #f1f1f1;
+  --color-bg-muted: #e9ecef;
+  --color-bg-success-light: #e8f5e8;
+  --color-bg-success-lighter: #d4edda;
+  --color-bg-warning-light: #fff3cd;
+  --color-bg-warning-lighter: #ffeaa7;
+  --color-bg-info-light: #e7f3ff;
+  --color-bg-info-lighter: #b3d9ff;
+  --color-bg-green-light: #f8fff9;
+  --color-bg-green-lighter: #e8f5e9;
+  --color-bg-blue-light: #e3f2fd;
+  --color-bg-hover-light: #c3e6ff;
+  
+  /* Border Colors */
+  --color-border-light: #ced4da;
+  --color-border-primary: #007bff;
+  --color-border-success: #28a745;
+  --color-border-danger: #dc3545;
+  --color-border-warning: #ffc107;
+  --color-border-muted: #dee2e6;
+}
