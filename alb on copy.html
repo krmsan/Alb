@@ -861,10 +861,99 @@
         .popup-btn.cancel:hover {
             background: #5a6268;
         }
+        
+        .data-controls {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .data-btn {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .data-btn.export {
+            border-color: #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .data-btn.export:hover {
+            background: #17a2b8;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(23,162,184,0.3);
+        }
+        
+        .data-btn.import {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        
+        .data-btn.import:hover {
+            background: #28a745;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+        
+        .data-controls-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #495057;
+            margin-right: 15px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 
 <body>
+    <!-- Veri İşlemleri Kontrolleri -->
+    <div class="data-controls">
+        <span class="data-controls-title">📊 Veri İşlemleri</span>
+        <button class="data-btn export" onclick="exportData()">
+            📥 Verileri İndir
+        </button>
+        <div class="file-input-wrapper">
+            <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+            <button class="data-btn import" onclick="document.getElementById('importFile').click()">
+                📤 Verileri Yükle
+            </button>
+        </div>
+    </div>
+
 <div class="wrapper">
     <!-- Soldaki tablo -->
     <div class="table-container">
@@ -1617,6 +1706,176 @@
             // Pencere boyutu değiştiğinde kutular yeniden boyutlandır
             window.addEventListener('resize', updateTotalBoxSizes);
         });
+
+        // Data Export/Import Functions
+        function exportData() {
+            try {
+                // Local storage'dan tüm verileri topla - sadece mevcut olanları
+                const exportData = {
+                    version: "1.0", // Version kontrolü için
+                    timestamp: new Date().toISOString(),
+                    data: {}
+                };
+
+                // Sadece gerçekten var olan verileri export et (boş/default değerleri değil)
+                const priceTableData = localStorage.getItem('priceTableData');
+                if (priceTableData) {
+                    exportData.data.priceTableData = JSON.parse(priceTableData);
+                }
+
+                const containerData = localStorage.getItem('containerData');
+                if (containerData) {
+                    exportData.data.containerData = JSON.parse(containerData);
+                }
+
+                const premiumFeeOptions = localStorage.getItem('premiumFeeOptions');
+                if (premiumFeeOptions) {
+                    exportData.data.premiumFeeOptions = JSON.parse(premiumFeeOptions);
+                }
+
+                const tableHeaders = localStorage.getItem('tableHeaders');
+                if (tableHeaders) {
+                    exportData.data.tableHeaders = JSON.parse(tableHeaders);
+                }
+
+                // JSON string'e çevir
+                const jsonString = JSON.stringify(exportData, null, 2);
+                
+                // Blob oluştur
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                
+                // Download linki oluştur
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                
+                // Dosya adı (tarih-saat ile)
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 19).replace(/[T:]/g, '-');
+                downloadLink.download = `urun-fiyat-verileri-${dateStr}.json`;
+                
+                // Download'ı başlat
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Export edilen veri sayısını göster
+                const exportedItems = Object.keys(exportData.data);
+                const message = exportedItems.length > 0 
+                    ? `✅ Veriler başarıyla indirildi!\n\nExport edilen veriler:\n• ${exportedItems.join('\n• ')}`
+                    : '⚠️ Henüz kaydedilmiş veri bulunamadı.\nTabloda değişiklik yaptıktan sonra tekrar deneyin.';
+                
+                alert(message);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('❌ Veri indirme sırasında hata oluştu: ' + error.message);
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Dosya tipini kontrol et
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                alert('❌ Lütfen geçerli bir JSON dosyası seçin!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                                 try {
+                     // JSON'ı parse et
+                     const importedData = JSON.parse(e.target.result);
+                     console.log(importedData);
+                     
+                     // Veri yapısını kontrol et
+                     if (!importedData.data) {
+                         throw new Error('Geçersiz veri formatı!');
+                     }
+
+                     // Onay al
+                     const confirmation = confirm('⚠️ Bu işlem mevcut tüm verileri değiştirecek. Devam etmek istiyor musunuz?');
+                     if (!confirmation) return;
+
+                     // Local storage'ı güncelle - sadece import edilen verilerde olan alanları
+                     const data = importedData.data;
+                     
+                     // Her veri tipini kontrol ederek kaydet - sadece gerçekten var olanları
+                     if (data.hasOwnProperty('priceTableData') && Array.isArray(data.priceTableData)) {
+                         localStorage.setItem('priceTableData', JSON.stringify(data.priceTableData));
+                     }
+                     
+                     if (data.hasOwnProperty('containerData') && typeof data.containerData === 'object') {
+                         // containerData yapısını kontrol et
+                         const containerData = {
+                             count: parseInt(data.containerData.count) || 4,
+                             values: data.containerData.values || {}
+                         };
+                         localStorage.setItem('containerData', JSON.stringify(containerData));
+                     }
+                     
+                     if (data.hasOwnProperty('premiumFeeOptions') && typeof data.premiumFeeOptions === 'object') {
+                         const premiumFeeOptions = {
+                             premium: data.premiumFeeOptions.premium || '',
+                             fee: data.premiumFeeOptions.fee || ''
+                         };
+                         localStorage.setItem('premiumFeeOptions', JSON.stringify(premiumFeeOptions));
+                     }
+                     
+                     if (data.hasOwnProperty('tableHeaders') && typeof data.tableHeaders === 'object') {
+                         const tableHeaders = {
+                             row1: Array.isArray(data.tableHeaders.row1) ? data.tableHeaders.row1 : [],
+                             row2: Array.isArray(data.tableHeaders.row2) ? data.tableHeaders.row2 : []
+                         };
+                         localStorage.setItem('tableHeaders', JSON.stringify(tableHeaders));
+                     }
+
+                    // Başarı mesajı
+                    alert('✅ Veriler başarıyla yüklendi! Sayfa yenileniyor...');
+                    
+                    // Sayfayı yenile (tüm verileri yeniden yüklemek için)
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('❌ Veri yükleme sırasında hata oluştu: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                alert('❌ Dosya okuma hatası!');
+            };
+
+            // Dosyayı oku
+            reader.readAsText(file);
+            
+            // Input'u temizle (aynı dosyayı tekrar seçebilmek için)
+            event.target.value = '';
+        }
+
+        // Helper function: Local storage veri tiplerini kontrol et
+        function validateLocalStorageData() {
+            try {
+                const priceTableData = localStorage.getItem('priceTableData');
+                const containerData = localStorage.getItem('containerData');
+                const premiumFeeOptions = localStorage.getItem('premiumFeeOptions');
+                const tableHeaders = localStorage.getItem('tableHeaders');
+
+                // Her birinin JSON parse edilebilir olduğunu kontrol et
+                if (priceTableData) JSON.parse(priceTableData);
+                if (containerData) JSON.parse(containerData);
+                if (premiumFeeOptions) JSON.parse(premiumFeeOptions);
+                if (tableHeaders) JSON.parse(tableHeaders);
+
+                return true;
+            } catch (error) {
+                console.warn('Local storage data validation failed:', error);
+                return false;
+            }
+        }
     </script>
     
     <script>
@@ -1682,11 +1941,11 @@
             rows.forEach(row => {
                 // "Satır Ekle" satırını kaydetme
                 if (!row.querySelector('.add-row-cell')) {
-                    const rowData = [];
-                    row.querySelectorAll('td').forEach(cell => {
-                        rowData.push(cell.innerText.trim());
-                    });
-                    data.push(rowData);
+                const rowData = [];
+                row.querySelectorAll('td').forEach(cell => {
+                    rowData.push(cell.innerText.trim());
+                });
+                data.push(rowData);
                 }
             });
             localStorage.setItem('priceTableData', JSON.stringify(data));
