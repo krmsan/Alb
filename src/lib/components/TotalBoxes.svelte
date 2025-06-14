@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { totalsStore, containersStore, optionsStore } from '$lib/stores';
+	console.log($totalsStore);
 
 	function updatePremium(event: Event) {
 		const value = (event.target as HTMLSelectElement).value as any;
@@ -27,6 +28,7 @@
 </script>
 
 <div class="flex gap-2 justify-center">
+	{$totalsStore.containerTotals}
 	<!-- Resources Total Box -->
 	<div class="flex-1 max-w-md p-4 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-500 rounded-lg shadow-lg">
 		<h4 class="text-sm font-bold text-green-700 mb-3 text-center">🔨 Kaynaklar</h4>
@@ -55,7 +57,7 @@
 		<div class="flex justify-between items-start gap-4">
 			<!-- Left side - Total info -->
 			<div class="flex-1">
-				<h4 class="text-sm font-bold text-yellow-700 mb-3">💰 Toplam Maliyet</h4>
+				<h4 class="text-sm font-bold text-yellow-700 mb-3 text-center">💰 Toplam Maliyet</h4>
 				
 				<!-- Box Indicators for All Containers -->
 				<div class="flex justify-center items-center gap-1 mb-3 flex-wrap">
